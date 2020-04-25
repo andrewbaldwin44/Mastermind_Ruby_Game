@@ -6,6 +6,7 @@ class String
   def blue;           "\e[34m#{self}\e[0m" end
   def magenta;        "\e[35m#{self}\e[0m" end
   def cyan;           "\e[36m#{self}\e[0m" end
+  def yellow;         "\e[33m#{self}\e[0m" end
   def gray;           "\e[37m#{self}\e[0m" end
 
   def bg_black;       "\e[40m#{self}\e[0m" end
@@ -38,3 +39,13 @@ class String
   def green_highlight;    "\e[1;32;40m#{self}\e[0m" end
   def yellow_highlight;   "\e[1;33;40m#{self}\e[0m" end
 end
+
+COLOR_INPUT = {
+  "R" => "R".red_block,
+  "G" => "G".green_block,
+  "B" => "B".blue_block,
+  "Y" => "Y".yellow_block,
+  "M" => "M".magenta_block,
+  "C" => "C".cyan_block,
+  "W" => "W".white_block
+}
