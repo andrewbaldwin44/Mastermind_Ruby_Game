@@ -28,8 +28,6 @@ class BreakerGameplay
     correct_positions = 0
     correct_colors = 0
 
-    puts "Code is: #{code}"
-
     color_checker.each_with_index do |color, index|
       if color_checker[index] == code_checker[index]
         correct_positions += 1
