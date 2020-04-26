@@ -22,8 +22,8 @@ class BreakerGameplay
   end
 
   def check_code
-    color_checker = colors
-    code_checker = code
+    color_checker = colors.dup
+    code_checker = code.dup
 
     correct_positions = 0
     correct_colors = 0
