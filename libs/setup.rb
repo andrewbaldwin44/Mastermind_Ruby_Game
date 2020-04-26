@@ -1,5 +1,3 @@
-require "./libs/validate"
-
 def coder_or_breaker?
   coder_breaker = gets.chomp.downcase
 
@@ -12,14 +10,12 @@ def coder_or_breaker?
     puts "Get cracking!"
 
     BreakerGameplay.new(code_length)
+
   elsif coder_breaker == "coder" || coder_breaker == "c"
     puts "Hold up! We're not ready for that quite yet :/".purple_highlight
+
   else
-    puts "\nWell that wasn't much of an answer!".red_highlight
-    puts \
-      "\nPlease answer with: #{"coder".bold.underline}(c) or #{"breaker".bold.underline}(b)" \
-      "\nThe coder makes the code to be broken while the breaker tries to break the code!"
-    coder_or_breaker?
+    Validate.get_valid_coder_breaker
   end
 end
 

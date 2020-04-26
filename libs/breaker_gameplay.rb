@@ -1,19 +1,14 @@
-require "./libs/display"
-require "./libs/style"
-require "./libs/validate"
-require "./libs/setup"
-
 class BreakerGameplay
   private
 
   include Display
   include Validate
 
-  COLORS = %w[R G B Y M C]
+  COLORS = %w[R G B Y M C W K]
 
   def initialize(code_length)
     @code_length = code_length
-    @code = (1..code_length).map { COLORS[rand(code_length)] }.join
+    @code = (1..code_length).map { COLORS[rand(8)] }
   end
 
   attr_accessor :code, :colors, :code_length
@@ -21,36 +16,39 @@ class BreakerGameplay
   public
 
   def get_guess
-    @colors = gets.chomp.upcase.gsub(/[^RGBYMC]/, "")
-    self.get_valid_colors unless @colors.length == colors.length && colors.length == code_length
+    @colors = gets.chomp.upcase.split("")
+    self.get_valid_colors unless @colors.all?{ |color| COLORS.include?(color)} && \
+                                 @colors.length == code_length
   end
 
   def check_code
-    temp = @code.split("")
+    color_checker = colors
+    code_checker = code
 
     correct_positions = 0
     correct_colors = 0
 
-    colors.split("").each_with_index do |color, index|
-      if temp[index] == colors[index]
+    puts "Code is: #{code}"
+
+    color_checker.each_with_index do |color, index|
+      if color_checker[index] == code_checker[index]
         correct_positions += 1
-        temp[index] = nil
-      elsif temp.include?(color)
-        correct_colors +=1
+        color_checker[index] = nil
+        code_checker[index] = nil
       end
     end
+
+    color_checker.compact.each { |color| correct_colors += 1 if code_checker.compact.include?(color)}
 
     self.display(colors)
     self.give_clues("[#{"•"*correct_colors}#{"•".red*correct_positions}]")
   end
 
   def won_game?
-    if code == colors
-      true
-    end
+    code == colors
   end
 
   def show_code
-    puts "#{"You lose! The code was:".red_highlight} #{colorize(code).join(" ")}"
+    puts "#{"You lose! The code was:".red_highlight} #{Display.colorize(code).join(" ")}"
   end
 end

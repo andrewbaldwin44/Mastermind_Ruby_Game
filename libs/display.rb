@@ -1,8 +1,6 @@
-require "./libs/style"
-
 module Display
   def display(colors_string)
-    colors = colorize(colors_string)
+    colors = Display.colorize(colors_string)
 
     puts display =
       "\n-----------------------------------------\n\n" \
@@ -14,7 +12,7 @@ module Display
          "\n-----------------------------------------\n\n"
   end
 
-  def colorize(colors)
-    colors.split("").map { |color| COLOR_INPUT[color]}
+  def self.colorize(colors)
+    colors.map { |color| COLOR_INPUT[color]}
   end
 end
