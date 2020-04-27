@@ -1,8 +1,16 @@
 module Validate
   def self.get_valid_rules
     puts "\nWell that wasn't much of an answer!".red_highlight
-    puts "Please answer '#{"no".bold.underline}' to see the rules or '#{"yes".bold.underline}' to start the game!"
-    Rules.show_rules?
+    puts "Please answer '#{"yes".bold.underline}' to see the rules or '#{"no".bold.underline}' to start the game!"
+
+    show_rules = gets.chomp.downcase
+    if show_rules == "yes" || show_rules == "y"
+      puts Rules.rules
+    elsif show_rules == "no" || show_rules == "n"
+      puts "\nLet's get started!"
+    else
+      self.get_valid_rules
+    end
   end
 
   def self.get_valid_coder_breaker
