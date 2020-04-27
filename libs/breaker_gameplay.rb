@@ -4,8 +4,6 @@ class BreakerGameplay
   include Display
   include Validate
 
-  COLORS = %w[R G B Y M C W K]
-
   def initialize(code_length)
     @code_length = code_length
     @code = (1..code_length).map { COLORS[rand(8)] }
