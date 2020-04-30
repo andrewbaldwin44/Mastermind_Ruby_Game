@@ -4,24 +4,30 @@ class BreakerGameplay
   include Display
   include Validate
 
-  def initialize(code_length)
+  def initialize(code, code_length)
     @code_length = code_length
-    @code = (1..code_length).map { COLORS[rand(8)] }
+    @code = code
   end
 
-  attr_accessor :code, :colors, :code_length
+  attr_accessor :code, :code_length
 
   public
 
+  attr_accessor :colors
+  attr_reader :code, :clue, :breaker_won
+
   def get_guess
     @colors = gets.chomp.upcase.split("")
-    self.get_valid_colors unless @colors.all?{ |color| COLORS.include?(color)} && \
-                                 @colors.length == code_length
+    get_valid_colors unless @colors.all?{ |color| COLORS.include?(color)} && \
+                            @colors.length == code_length
   end
 
   def check_code
     color_checker = colors.dup
     code_checker = code.dup
+
+    # puts "code: #{code}"
+    # puts "code_checker: #{code_checker}"
 
     correct_positions = 0
     correct_colors = 0
@@ -35,16 +41,14 @@ class BreakerGameplay
     end
 
     color_checker.compact.each { |color| correct_colors += 1 if code_checker.compact.include?(color)}
-
-    self.display(colors)
-    self.give_clues("[#{"•"*correct_colors}#{"•".red*correct_positions}]")
+    @clue = "[#{"•"*correct_colors}#{"•".red*correct_positions}]"
   end
 
-  def won_game?
+  def breaker_won?
     code == colors
   end
 
   def show_code
-    puts "#{"You lose! The code was:".red_highlight} #{Display.colorize(code).join(" ")}"
+    puts Display.colorize(code).join(" ")
   end
 end

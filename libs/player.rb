@@ -2,11 +2,12 @@ def player
   puts "\nSweet! And how many colors should the code contain?(4, 5, 6, 7, 8)".yellow_highlight
 
   code_length = get_code_length
+  code = (1..code_length).map { COLORS[rand(8)] }
 
   puts "\nAlright! The computer has created a top secret code!"
   puts "Get cracking!"
 
-  mastermind = BreakerGameplay.new(code_length)
+  mastermind = BreakerGameplay.new(code, code_length)
 
   puts "\n\n-----------------------------------------------------\n\n\n"
 
@@ -18,11 +19,10 @@ def player
     mastermind.get_guess
     mastermind.check_code
 
-    if mastermind.won_game?
-      puts "#{"Congragulations! You guessed the code!".green_block}\n"
-      break
-    end
-  end
+    Display.display(mastermind.colors)
+    Display.give_clues(mastermind.clue)
 
-  mastermind.show_code unless mastermind.won_game?
+    break if mastermind.breaker_won?
+  end
+  mastermind
 end

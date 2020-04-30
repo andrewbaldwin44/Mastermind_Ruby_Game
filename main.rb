@@ -1,3 +1,5 @@
+require 'io/console'
+require 'set'
 require_relative "libs/style"
 require_relative "libs/display"
 require_relative "libs/validate"
@@ -8,6 +10,7 @@ require_relative "libs/computer"
 require_relative "libs/breaker_gameplay"
 
 COLORS = %w[R G B Y M C W K]
+
 
 puts "\nWelcome! Let's play a game of Mastermind!".bg_blue
 puts "\nHave you ever played before?(yes/no)"

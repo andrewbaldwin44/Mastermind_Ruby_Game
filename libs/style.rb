@@ -32,13 +32,14 @@ class String
   def yellow_block;  "\e[43m  #{self}  \e[0m" end
   def red_block;     "\e[41m  #{self}  \e[0m" end
   def white_block;   "\e[30m\e[47m  #{self}  \e[0m" end
-  def black_block;    "\e[31m\e[40m  #{self}  \e[0m" end
+  def black_block;   "\e[31m\e[40m  #{self}  \e[0m" end
 
-  def cyan_highlight;   "\e[1;36;40m#{self}\e[0m" end
+  def cyan_highlight;     "\e[1;36;40m#{self}\e[0m" end
   def purple_highlight;   "\e[1;35;40m#{self}\e[0m" end
   def red_highlight;      "\e[1;31;40m#{self}\e[0m" end
   def green_highlight;    "\e[1;32;40m#{self}\e[0m" end
   def yellow_highlight;   "\e[1;33;40m#{self}\e[0m" end
+  def blue_highlight;     "\e[1;34;40m#{self}\e[0m" end
 end
 
 COLOR_INPUT = {

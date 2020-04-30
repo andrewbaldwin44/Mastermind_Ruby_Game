@@ -1,13 +1,17 @@
 module Display
-  def display(colors_string)
+  def self.display(colors_string)
     colors = Display.colorize(colors_string)
 
-    puts display =
+    puts \
       "\n-----------------------------------------\n\n" \
       "#{colors.join(" ")}\n\n" \
   end
 
-  def give_clues(clue)
+  def self.show_colors(colos)
+    puts colos
+  end
+
+  def self.give_clues(clue)
     puts "#{clue}\n" \
          "\n-----------------------------------------\n\n"
   end

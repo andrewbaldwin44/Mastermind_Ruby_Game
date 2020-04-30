@@ -29,10 +29,18 @@ module Validate
     get_code_length
   end
 
+  def self.get_valid_user_code
+    puts "\nAlrighty, tThat code wasn't quite valid!".red_highlight
+    puts "Please create a code with 4-8 letters, each corresponding with a color"
+
+    get_user_code
+  end
+
   def get_valid_colors
-    puts "\nWoah woah woah! Those are not the right colors! Lets try that agin".red_highlight
+    puts "\nWoah woah woah! Those are not the right colors! Lets try that again".red_highlight
     puts "Please enter #{code_length} letters, each corresponding with a color"
     puts "For example, you could guess: '#{(1..code_length).map { COLORS[rand(8)] }.join("")}'"
+
     self.get_guess
   end
 end

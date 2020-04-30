@@ -2,10 +2,23 @@ def coder_or_breaker?
   coder_breaker = gets.chomp.downcase
 
   if coder_breaker == "breaker" || coder_breaker == "b"
-    player
+    mode = player
+
+    if mode.breaker_won?
+      puts "#{"Congragulations! You guessed the code!".green_block}\n"
+    else
+      puts "#{"You lose! The code was: #{mode.code}".red_highlight} \n"
+    end
+
   elsif coder_breaker == "coder" || coder_breaker == "c"
-    puts "Hold up! We're not ready for that quite yet :/".purple_highlight
-    computer
+    mode = computer
+
+    if mode.breaker_won?
+      puts "#{"Congragulations! You guessed the code!".green_block}\n"
+    else
+      puts "#{"You lose! The code was: #{mode.code}".red_highlight} \n"
+    end
+
   else
     Validate.get_valid_coder_breaker
   end
