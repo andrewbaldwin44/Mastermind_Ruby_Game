@@ -4,15 +4,14 @@ class BreakerGameplay
   include Display
   include Validate
 
-  def initialize(code, code_length)
-    @code = code
+  def initialize(code_length)
     @code_length = code_length
   end
 
   public
 
   attr_accessor :colors, :code, :code_length
-  attr_reader :clue, :breaker_won
+  attr_reader :breaker_won
 
   def get_guess
     @colors = gets.chomp.upcase.split("")
@@ -20,7 +19,7 @@ class BreakerGameplay
                             @colors.length == code_length
   end
 
-  def check_code
+  def calculate_clue
     color_checker = colors.dup
     code_checker = code.dup
 
@@ -36,7 +35,8 @@ class BreakerGameplay
     end
 
     color_checker.compact.each { |color| correct_colors += 1 if code_checker.compact.include?(color)}
-    @clue = "[#{"•"*correct_colors}#{"•".red*correct_positions}]"
+
+    "[#{"•"*correct_colors}#{"•".red*correct_positions}]"
   end
 
   def breaker_won?

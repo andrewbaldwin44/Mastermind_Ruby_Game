@@ -7,7 +7,8 @@ def player
   puts "\nAlright! The computer has created a top secret code!"
   puts "Get cracking!".italic
 
-  mastermind = BreakerGameplay.new(code, code_length)
+  mastermind = BreakerGameplay.new(code_length)
+  mastermind.code = code
 
   puts "\n\n-----------------------------------------------------\n\n\n"
 
@@ -17,10 +18,10 @@ def player
     puts "Make your guess in the form of '#{COLORS.take(code_length).join("")}'"
 
     mastermind.get_guess
-    mastermind.check_code
+    clue = mastermind.calculate_clue
 
     Display.display(mastermind.colors)
-    Display.give_clues(mastermind.clue)
+    Display.give_clues(clue)
 
     break if mastermind.breaker_won?
   end

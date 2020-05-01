@@ -5,15 +5,24 @@ class MinMaxAlgorithm
   def initialize(mastermind, possible_colors)
     @mastermind = mastermind
 
-    @all_codes = possible_colors.product(*[possible_colors] * 3)
+    #Using cartesian product, create an array of every possible combination of codes
+    #Here the multiplication method accepts each possbile_colors array as *args
+    @all_codes = possible_colors.product(*[possible_colors] * (mastermind.code_length - 1))
     @all_clues = Hash.new { |h, k| h[k] = {}}
 
+    #With each possible code that the mastermind can create,
+    #The code has a set amount of possible guesses that could be made towards it
+    #We then calculate what the theoretical score would be for each match-up
+    #and are thus able to create an array of all possible scores!
+    #e.g. if we pretend the code was 'RGBY', then the matching guesses would be
+    #'GBYR', 'MCRG', 'RRRR', etc. And each match would have a corresponding score
     @all_codes.product(@all_codes).each do |colors, code|
       @best_colors = colors
       @code = code
       mastermind.colors = colors
       mastermind.code = code
-      @all_clues[colors][code] = mastermind.check_code
+
+      @all_clues[colors][code] = mastermind.calculate_clue
     end
 
     @all_codes = @all_codes.to_set
@@ -22,16 +31,20 @@ class MinMaxAlgorithm
   public
 
   attr_reader :round
+  attr_accessor :code
 
   private
 
-  attr_accessor :best_colors, :code
+  attr_accessor :best_colors
   attr_reader :mastermind, :all_codes, :all_clues, :possible_codes, :possible_clues, :clue
 
   def calculate_guess
     if round > 0
+      #With each guess we can rule out code possibilities
       possible_codes.keep_if { |code| all_clues[best_colors][code] == clue}
 
+      #Using the minimax algorithm logic, we can create an order of all posible scores
+      #According to this logic, the lowest heuristic value will be the best guess to make
       ordered_codes = possible_clues.map do |colors, clues_by_code|
           clues_by_code = clues_by_code.select { |code, clue|
             possible_codes.include?(code)
@@ -41,13 +54,13 @@ class MinMaxAlgorithm
           clue_groups = clues_by_code.values.group_by(&:itself)
           possibilty_counts = clue_groups.values.map(&:length)
           worst_case = possibilty_counts.max
-          impossible_win = possible_codes.include?(colors) ? 0 : 1
-          [worst_case, impossible_win, colors]
+          impossible_win = possible_codes.include?(colors) ? 0 : 1 #a guess that could not possibly be the code may give us the most information as to what the code could be
+          [worst_case, impossible_win, colors] #heuristic value
       end
 
-      ordered_codes.min.last
+      ordered_codes.min.last #last corresponds to the colors in the heuristic
     else
-      %w[R R G G]
+      %w[R R G G] #the very best first guess to make according to Donald Kuth
     end
   end
 
@@ -64,7 +77,7 @@ class MinMaxAlgorithm
       self.best_colors = calculate_guess
       mastermind.colors = best_colors
 
-      @clue = mastermind.check_code
+      @clue = mastermind.calculate_clue
 
       Display.display(best_colors)
       Display.give_clues(@clue)
@@ -83,19 +96,22 @@ def computer
   color_amount = get_possible_colors
   possible_colors = COLORS[0, color_amount]
 
-  puts "\nPlease just give the computer a minute to warm up!".cyan_highlight.italic
-
-  mastermind ||= BreakerGameplay.new(nil, nil)
-  minimax ||= MinMaxAlgorithm.new(mastermind, possible_colors)
-
   puts "\n#{"Alright mastermind, enter your secret code!(Your input will be invisible!)".purple_highlight}\n"
   puts "\nThere are #{color_amount} colors to chose from: #{Display.colorize(possible_colors).join(" ")}"
+  puts "\nYour secret code must be between 4 and #{color_amount} colors long."
+  puts "Please keep in mind more colors means more thinking!".italic
 
   user_code = get_user_code
   code_length = user_code.length
 
+  puts "\nPlease just give the computer a minute to warm up!".cyan_highlight.italic
+
+  mastermind = BreakerGameplay.new(code_length)
+  minimax = MinMaxAlgorithm.new(mastermind, possible_colors)
+
   mastermind.code = user_code
   mastermind.code_length = code_length
+  minimax.code = user_code
 
   puts "\n#{"Nice! The computer will now do it's best to crack your code".blue_highlight}\n\n"
   minimax.play
