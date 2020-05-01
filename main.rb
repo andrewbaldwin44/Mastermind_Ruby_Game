@@ -9,7 +9,7 @@ require_relative "libs/player"
 require_relative "libs/computer"
 require_relative "libs/breaker_gameplay"
 
-COLORS = %w[R G B Y M C W K]
+COLORS = %w[R G B Y M C]
 
 
 puts "\nWelcome! Let's play a game of Mastermind!".bg_blue

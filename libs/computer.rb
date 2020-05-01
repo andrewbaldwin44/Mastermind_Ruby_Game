@@ -1,154 +1,101 @@
+require 'set'
+require_relative 'style'
+
 class MinMaxAlgorithm
   def initialize(mastermind)
-    colors = "12345678".chars
-
     @mastermind = mastermind
-    @mastermind.colors = %w[G G B B]
 
-    #Create an array of every possible combination of answers (cartesian product)
-    #Here the multiplication method takes the entire colors array as *args
-    @all_answers = colors.product(*[colors] * 3).map(&:join)
-    @all_scores = Hash.new { |h, k| h[k] = {}}
+    @all_codes = COLORS.product(*[COLORS] * 3)
+    @all_clues = Hash.new { |h, k| h[k] = {}}
 
-    #Each answer gets mapped to a potential score
-    @all_answers.product(@all_answers).each do |guess, answer|
-      @all_scores[guess][answer] = @mastermind.check_code
+    @all_codes.product(@all_codes).each do |colors, code|
+      @best_colors = colors
+      @code = code
+      mastermind.colors = colors
+      mastermind.code = code
+      @all_clues[colors][code] = mastermind.check_code.gsub("\e[31m•\e[0m", "r")
     end
 
-    @all_answers.to_set
+    @all_codes = @all_codes.to_set
   end
 
-  attr_reader :all_answers, :all_scores, :round
-  attr_accessor :mastermind, :guess, :possible_scores, :possible_answers
+  public
+
+  attr_reader :all_codes, :all_clues
+
+  private
+
+  attr_accessor :best_colors, :code
+  attr_reader :mastermind, :possible_codes, :possible_clues, :round, :clue
+
+  def calculate_guess
+    if round > 0
+      possible_codes.keep_if { |code| all_clues[best_colors][code] == clue}
+
+      ordered_codes = possible_clues.map do |colors, clues_by_code|
+          clues_by_code = clues_by_code.select { |code, clue|
+            possible_codes.include?(code)
+          }
+          possible_clues[colors] = clues_by_code
+
+          clue_groups = clues_by_code.values.group_by(&:itself)
+          possibilty_counts = clue_groups.values.map(&:length)
+          worst_case = possibilty_counts.max
+          impossible_win = possible_codes.include?(colors) ? 0 : 1
+          [worst_case, impossible_win, colors]
+      end
+
+      ordered_codes.min.last
+    else
+      %w[R R G G]
+    end
+  end
+
+  public
 
   def play
-    @guess = 0
-    @possible_scores = @all_scores.dup
-    @possible_answers = @all_answers.dup
+    @possible_clues = all_clues.dup
+    @possible_codes = all_codes.dup
 
     10.times do |round|
-      puts "#{"Round #{round + 1} of 10".bold.underline}\n"
-
       @round = round
-      @guess = make_guess
 
-      mastermind.colors = [COLORS[@guess[0].to_i], COLORS[@guess[1].to_i], COLORS[@guess[2].to_i], COLORS[@guess[3].to_i]]
-      @score = mastermind.check_code
-      Display.display(mastermind.colors)
-      Display.give_clues(mastermind.clue)
-      break if mastermind.breaker_won?
-    end
-  end
+      self.best_colors = calculate_guess
+      mastermind.colors = best_colors
 
-  def calculate_score(guess, answer)
-    score = ""
-    wrong_guess_pegs, wrong_answer_pegs = [], []
-    peg_pairs = guess.chars.zip(answer.chars)
+      @clue = mastermind.check_code.gsub("\e[31m•\e[0m", "r")
 
-    peg_pairs.each do |guess_peg, answer_peg|
-      if guess_peg == answer_peg
-        score << "B"
-      else
-        wrong_guess_pegs << guess_peg
-        wrong_answer_pegs << answer_peg
+      Display.display(best_colors)
+      Display.give_clues(@clue)
+
+      if mastermind.breaker_won?
+        break
       end
-    end
-    wrong_guess_pegs.each do |peg|
-      if wrong_answer_pegs.include?(peg)
-        wrong_answer_pegs.delete(peg)
-        score << "W"
-      end
-    end
-
-    score
-  end
-
-  def make_guess
-    if round > 0
-      possible_answers.keep_if { |answer| @all_scores[@guess][answer] == @score}
-
-      guesses = possible_scores.map do |guess, scores_per_answer|
-          scores_per_answer = scores_per_answer.select { |answer, score|
-            possible_answers.include?(answer)
-          }
-          possible_scores[guess] = scores_per_answer
-
-          score_groups = scores_per_answer.values.group_by(&:itself)
-          possibilty_counts = score_groups.values.map(&:length)
-          worst_case = possibilty_counts.max
-          impossible_guess = possible_answers.include?(guess) ? 0 : 1
-
-          #Heurestic Value
-          [worst_case, impossible_guess, guess]
-      end
-
-      guesses.min.last #last because guess is last item in Heurestic
-    else
-      "1122"
     end
   end
 end
 
 def computer
-  puts "\nAlright mastermind, enter your secret code!(Your input will be invisible!)".purple_highlight
+  puts "\nAwesome! Now please just give the computer a minute to warm up!".blue_highlight
+
+  mastermind = BreakerGameplay.new(nil, nil)
+  minimax = MinMaxAlgorithm.new(mastermind)
+
+  puts "\n#{"Alright mastermind, enter your secret code!(Your input will be invisible!)".purple_highlight}\n"
 
   user_code = get_user_code
   code_length = user_code.length
 
-  mastermind = BreakerGameplay.new(user_code, code_length)
+  mastermind.code = user_code
+  mastermind.code_length = code_length
 
   puts "\nNice! The computer will now do it's best to crack your code".blue_highlight
-  puts "#{"Please give it a minute to warm up!".blue_highlight}\n\n"
-  MinMaxAlgorithm.new(mastermind).play
+  minimax.play
   mastermind
 end
 
-# def computer
-#   possible_colors = COLORS
-#
-#   last_clue = ""
-#   last_guess = ""
-#   best_guess = nil
-#
-#   10.times do |round|
-#
-#
-#     if round == 0
-#       guessed_colors = (possible_colors[0] * 2 + possible_colors[1] * 2).split("")
-#       last_guess = guessed_colors
-#       mastermind.colors = guessed_colors
-#       mastermind.check_code
-#       best_guess = MinMaxAlgorithm.new(mastermind)
-#     else
-#       best_guess.guess = "#{COLORS.index(last_guess[0])}#{COLORS.index(last_guess[1])}#{COLORS.index(last_guess[2])}#{COLORS.index(last_guess[3])}"
-#       best_guess.compute(last_clue).chars.map(&:to_i)
-#       p best_guess
-#       best_colors = [COLORS[best_guess[0]], COLORS[best_guess[1]], COLORS[best_guess[2]], COLORS[best_guess[3]]]
-#       p best_colors
-#
-#       mastermind.check_code
-#       last_guess = best_colors
-#     end
-#
-#
-#     Display.display(mastermind.colors)
-#     Display.give_clues(mastermind.clue)
-#
-#     clue = mastermind.clue.gsub("\e[31m•\e[0m", "r")
-#     red_dots = clue.count("r")
-#     white_dots = clue.count("•")
-#
-#     last_clue = clue
-#     last_reds = red_dots
-#     last_whites = white_dots
-#
-#     break if mastermind.breaker_won?
-#   end
-#   mastermind
-# end
-
 def get_user_code
-  user_code = STDIN.noecho(&:gets).chomp.upcase.split("")
+  user_code = STDIN.noecho(&:gets).chomp.upcase.chars
   user_code = Validate.get_valid_user_code unless user_code.all?{ |color| COLORS.include?(color)} && \
                                       user_code.length  >= 4 && user_code.length <= 8
   user_code

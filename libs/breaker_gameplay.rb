@@ -5,15 +5,13 @@ class BreakerGameplay
   include Validate
 
   def initialize(code, code_length)
-    @code_length = code_length
     @code = code
+    @code_length = code_length
   end
-
-  attr_accessor :code, :code_length
 
   public
 
-  attr_accessor :colors
+  attr_accessor :colors, :code, :code_length
   attr_reader :code, :clue, :breaker_won
 
   def get_guess
