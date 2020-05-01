@@ -22,7 +22,9 @@ class MinMaxAlgorithm
       mastermind.colors = colors
       mastermind.code = code
 
-      @all_clues[colors][code] = mastermind.calculate_clue
+      #optimized: score for when code == colors is the same score for when colors == code
+      #this score should only be taken into account once
+      @all_clues[colors][code] = mastermind.calculate_clue unless @all_clues[colors][code]
     end
 
     @all_codes = @all_codes.to_set
