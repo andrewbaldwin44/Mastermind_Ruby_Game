@@ -11,12 +11,12 @@ def coder_or_breaker?
     end
 
   elsif coder_breaker == "coder" || coder_breaker == "c"
-    mode = computer
+    mode, minimax = computer
 
     if mode.breaker_won?
-      puts "#{"Congragulations! You guessed the code!".green_block}\n"
+      puts "#{"Uh oh! The computer broke your code in #{minimax.round + 1} rounds!".red_highlight}\n"
     else
-      puts "#{"You lose! The code was: #{mode.code}".red_highlight} \n"
+      puts "#{"Wow! You won! The computer could not break your code!".green_highlight} \n"
     end
 
   else

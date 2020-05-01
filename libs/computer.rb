@@ -2,10 +2,10 @@ require 'set'
 require_relative 'style'
 
 class MinMaxAlgorithm
-  def initialize(mastermind)
+  def initialize(mastermind, possible_colors)
     @mastermind = mastermind
 
-    @all_codes = COLORS.product(*[COLORS] * 3)
+    @all_codes = possible_colors.product(*[possible_colors] * 3)
     @all_clues = Hash.new { |h, k| h[k] = {}}
 
     @all_codes.product(@all_codes).each do |colors, code|
@@ -13,7 +13,7 @@ class MinMaxAlgorithm
       @code = code
       mastermind.colors = colors
       mastermind.code = code
-      @all_clues[colors][code] = mastermind.check_code.gsub("\e[31m•\e[0m", "r")
+      @all_clues[colors][code] = mastermind.check_code
     end
 
     @all_codes = @all_codes.to_set
@@ -21,12 +21,12 @@ class MinMaxAlgorithm
 
   public
 
-  attr_reader :all_codes, :all_clues
+  attr_reader :round
 
   private
 
   attr_accessor :best_colors, :code
-  attr_reader :mastermind, :possible_codes, :possible_clues, :round, :clue
+  attr_reader :mastermind, :all_codes, :all_clues, :possible_codes, :possible_clues, :clue
 
   def calculate_guess
     if round > 0
@@ -58,12 +58,13 @@ class MinMaxAlgorithm
     @possible_codes = all_codes.dup
 
     10.times do |round|
+      puts "Round #{round+1} of 10".bold.underline
       @round = round
 
       self.best_colors = calculate_guess
       mastermind.colors = best_colors
 
-      @clue = mastermind.check_code.gsub("\e[31m•\e[0m", "r")
+      @clue = mastermind.check_code
 
       Display.display(best_colors)
       Display.give_clues(@clue)
@@ -76,12 +77,19 @@ class MinMaxAlgorithm
 end
 
 def computer
-  puts "\nAwesome! Now please just give the computer a minute to warm up!".blue_highlight
+  puts "\nHow many possible colors should there be?(6, 7, 8)".yellow_highlight
+  puts "You should expect a longer thinking time for anything above 6!".italic
 
-  mastermind = BreakerGameplay.new(nil, nil)
-  minimax = MinMaxAlgorithm.new(mastermind)
+  color_amount = get_possible_colors
+  possible_colors = COLORS[0, color_amount]
+
+  puts "\nPlease just give the computer a minute to warm up!".cyan_highlight.italic
+
+  mastermind ||= BreakerGameplay.new(nil, nil)
+  minimax ||= MinMaxAlgorithm.new(mastermind, possible_colors)
 
   puts "\n#{"Alright mastermind, enter your secret code!(Your input will be invisible!)".purple_highlight}\n"
+  puts "\nThere are #{color_amount} colors to chose from: #{Display.colorize(possible_colors).join(" ")}"
 
   user_code = get_user_code
   code_length = user_code.length
@@ -89,14 +97,20 @@ def computer
   mastermind.code = user_code
   mastermind.code_length = code_length
 
-  puts "\nNice! The computer will now do it's best to crack your code".blue_highlight
+  puts "\n#{"Nice! The computer will now do it's best to crack your code".blue_highlight}\n\n"
   minimax.play
-  mastermind
+  return mastermind, minimax
+end
+
+def get_possible_colors
+  color_amount = gets.chomp.to_i
+  color_amount = Validate.get_valid_possible_colors unless color_amount >= 6 && color_amount <= 8
+  color_amount
 end
 
 def get_user_code
   user_code = STDIN.noecho(&:gets).chomp.upcase.chars
   user_code = Validate.get_valid_user_code unless user_code.all?{ |color| COLORS.include?(color)} && \
-                                      user_code.length  >= 4 && user_code.length <= 8
+                                                  user_code.length  >= 4 && user_code.length <= 8
   user_code
 end

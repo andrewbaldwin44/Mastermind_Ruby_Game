@@ -5,7 +5,7 @@ def player
   code = (1..code_length).map { COLORS[rand(8)] }
 
   puts "\nAlright! The computer has created a top secret code!"
-  puts "Get cracking!"
+  puts "Get cracking!".italic
 
   mastermind = BreakerGameplay.new(code, code_length)
 

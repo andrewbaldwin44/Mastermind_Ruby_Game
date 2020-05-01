@@ -12,7 +12,7 @@ class BreakerGameplay
   public
 
   attr_accessor :colors, :code, :code_length
-  attr_reader :code, :clue, :breaker_won
+  attr_reader :clue, :breaker_won
 
   def get_guess
     @colors = gets.chomp.upcase.split("")
@@ -23,9 +23,6 @@ class BreakerGameplay
   def check_code
     color_checker = colors.dup
     code_checker = code.dup
-
-    # puts "code: #{code}"
-    # puts "code_checker: #{code_checker}"
 
     correct_positions = 0
     correct_colors = 0

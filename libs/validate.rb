@@ -24,16 +24,27 @@ module Validate
   def self.get_valid_code_length
     puts "\nSorry! That didn't make any sense!".red_highlight
     puts "Please chose how many colors the code should be generated with."
-    puts "Answer with #{(4..7).map{ |number| "'#{number.to_s.bold}'"}.join(", ")}, or '#{"8".bold}'."
+    puts "Answer with #{bold_numbers(4, 7)}"
 
     get_code_length
   end
 
+  def self.get_valid_possible_colors
+    puts "\nError! Cannot compute!".red_highlight
+    puts "Please select how many possible colors should be included: #{bold_numbers(6, 7)}"
+
+    get_possible_colors
+  end
+
   def self.get_valid_user_code
-    puts "\nAlrighty, tThat code wasn't quite valid!".red_highlight
+    puts "\nAlrighty, That code wasn't quite valid!".red_highlight
     puts "Please create a code with 4-8 letters, each corresponding with a color"
 
     get_user_code
+  end
+
+  def self.bold_numbers(range_start, range_end)
+    "#{(range_start..range_end).map{ | number| "'#{number.to_s.bold}'"}.join(", ")} or '#{"8".bold}'."
   end
 
   def get_valid_colors
