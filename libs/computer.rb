@@ -42,24 +42,33 @@ class MinMaxAlgorithm
 
   def calculate_guess
     if round > 0
-      #With each guess we can rule out code possibilities
+      #With each guess we can rule out code possibilities by checking the clue against the previous
       possible_codes.keep_if { |code| all_clues[best_colors][code] == clue}
 
-      #Using the minimax algorithm logic, we can create an order of all posible scores
-      #According to this logic, the lowest heuristic value will be the best guess to make
-      ordered_codes = possible_clues.map do |colors, clues_by_code|
-          clues_by_code = clues_by_code.select { |code, clue|
-            possible_codes.include?(code)
-          }
-          possible_clues[colors] = clues_by_code
+      #Using the minimax algorithm logic, we can create an order of all posible color combinations
+      #We do this using a heuristic value of the worst possible guess to make, an impossible guess (preferring a possible guess), and the color combination itself
+      #The lowest heuristic value will be the best guess to make
 
-          clue_groups = clues_by_code.values.group_by(&:itself)
-          possibilty_counts = clue_groups.values.map(&:length)
-          worst_case = possibilty_counts.max
-          impossible_win = possible_codes.include?(colors) ? 0 : 1 #a guess that could not possibly be the code may give us the most information as to what the code could be
-          [worst_case, impossible_win, colors] #heuristic value
+      #The logic here is that there are 15 different combinations of clues that can be given by the code maker
+      #but many color combinations could potentially receive the same clues
+      #By this logic, the clue that would be given to the least amount of color combinations
+      #would net us the most amount of information and therefore allow us to rule out the largest amount of possible codes
+      ordered_codes = possible_clues.map do |code, clues_per_colors_map|
+          #filter out codes no longer possible according to previous score
+          clues_per_colors_map = clues_per_colors_map.select do |colors, clue|
+            possible_codes.include?(colors)
+          end
+          #store the reduced map back into the possible clues
+          possible_clues[code] = clues_per_colors_map
+
+          clue_groups = clues_per_colors_map.values.group_by(&:itself) #group identical clues together -> gives us how many different responses the code maker could give
+          possibilty_counts = clue_groups.values.map(&:length) #gives the amount of colors combination that would net the same clues
+          worst_case = possibilty_counts.max #maximizing player -> which clue group could be netted by the most amount of color combinations -> would net the least information
+          impossible_win = possible_codes.include?(code) ? 0 : 1 #a guess that could not possibly be the code may give us the most information as to what the code could be
+          [worst_case, impossible_win, code] #heuristic value
       end
 
+      #minimizing player
       ordered_codes.min.last #last corresponds to the colors in the heuristic
     else
       %w[R R G G] #the very best first guess to make according to Donald Kuth
