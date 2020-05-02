@@ -4,10 +4,11 @@ require_relative 'style'
 class MinMaxAlgorithm
   def initialize(mastermind, possible_colors)
     @mastermind = mastermind
+    @possible_colors = possible_colors
 
     #Using cartesian product, create an array of every possible combination of codes
     #Here the multiplication method accepts each possbile_colors array as *args
-    @all_codes = possible_colors.product(*[possible_colors] * (mastermind.code_length - 1))
+    @all_codes = @possible_colors.product(*[@possible_colors] * (mastermind.code_length - 1))
     @all_clues = Hash.new { |h, k| h[k] = {}}
 
     #With each possible code that the mastermind can create,
@@ -32,7 +33,7 @@ class MinMaxAlgorithm
 
   public
 
-  attr_reader :round
+  attr_reader :possible_colors, :round
   attr_accessor :code
 
   private
@@ -77,7 +78,7 @@ class MinMaxAlgorithm
 
   public
 
-  def play
+  def solve
     @possible_clues = all_clues.dup
     @possible_codes = all_codes.dup
 
@@ -115,18 +116,22 @@ def computer
   user_code = get_user_code
   code_length = user_code.length
 
-  puts "\nPlease just give the computer a minute to warm up!".cyan_highlight.italic
+  @mastermind ||= BreakerGameplay.new(code_length)
 
-  mastermind = BreakerGameplay.new(code_length)
-  minimax = MinMaxAlgorithm.new(mastermind, possible_colors)
+  puts "\nPlease just give the computer a minute to warm up!(this is only done the first time!)".cyan_highlight.italic unless defined?(@minimax)
+  if defined?(@minimax) && (@minimax.code.length != user_code.length || @minimax.possible_colors != possible_colors)
+    @minimax = MinMaxAlgorithm.new(@mastermind, possible_colors)
+  else
+    @minimax ||= MinMaxAlgorithm.new(@mastermind, possible_colors)
+  end
 
-  mastermind.code = user_code
-  mastermind.code_length = code_length
-  minimax.code = user_code
+  @mastermind.code = user_code
+  @mastermind.code_length = code_length
+  @minimax.code = user_code
 
   puts "\n#{"Nice! The computer will now do it's best to crack your code".blue_highlight}\n\n"
-  minimax.play
-  return mastermind, minimax
+  @minimax.solve
+  return @mastermind, @minimax
 end
 
 def get_possible_colors
